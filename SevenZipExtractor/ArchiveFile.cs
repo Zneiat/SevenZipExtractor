@@ -199,41 +199,23 @@ namespace SevenZipExtractor
 
         private void InitializeAndValidateLibrary()
         {
-            if (string.IsNullOrWhiteSpace(this.libraryFilePath))
-            {
-                string currentArchitecture = IntPtr.Size == 4 ? "x86" : "x64"; // magic check
+            var libPath = "7z.dll";
 
-                if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "7z-" + currentArchitecture + ".dll")))
+            if (!String.IsNullOrWhiteSpace(this.libraryFilePath))
+            {
+                if (File.Exists(this.libraryFilePath))
                 {
-                    this.libraryFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "7z-" + currentArchitecture + ".dll");
+                    libPath = this.libraryFilePath;
                 }
-                else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "7z-" + currentArchitecture + ".dll")))
+                else
                 {
-                    this.libraryFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin", "7z-" + currentArchitecture + ".dll");
-                }
-                else if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, currentArchitecture, "7z.dll")))
-                {
-                    this.libraryFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, currentArchitecture, "7z.dll");
-                }
-                else if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "7-Zip", "7z.dll")))
-                {
-                    this.libraryFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "7-Zip", "7z.dll");
+                    throw new SevenZipException("7z.dll not found");
                 }
             }
-
-            if (string.IsNullOrWhiteSpace(this.libraryFilePath))
-            {
-                throw new SevenZipException("libraryFilePath not set");
-            }
-
-            if (!File.Exists(this.libraryFilePath))
-            {
-                throw new SevenZipException("7z.dll not found");
-            }
-
+            
             try
             {
-                this.sevenZipHandle = new SevenZipHandle(this.libraryFilePath);
+                this.sevenZipHandle = new SevenZipHandle(libPath);
             }
             catch (Exception e)
             {
